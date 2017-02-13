@@ -45,15 +45,34 @@ QUERY
 
 ### Iteration with `RECURSIVE`
 
-Consider a query as a function mapping zero or more relations to a new relation,
-and use the notation `Q(R1, R2, ...)` as the output of the query.
+    WITH R(c1,c2,c3) AS (
+        SELECT-QUERY without using R, call this Q0
+        UNION
+        SELECT-QUERY with using R, call this Q1
+    )
 
-This allows as the write the following type of programs:
+This corresponds to the following pseudo code.
 
-```
-let R0 = Q0(....)
-let T1 = R0
-while not empty T1:
-    let T2 = Q1(T1, ...)
-    let T1 = T1 UNION T2
-```
+    var R0 Relation(c1,c2,c3) = empty
+    var R1 Relation(c1,c2,c3) = empty
+    var R2 Relation(c1,c2,c3)
+
+    R0 = Q0()
+    R1 = R0
+    while R1 != empty:
+        R2 = Q1(R1)
+        R0 = R0 UNION R2
+        R1 = R2
+
+## A more intuitive interpretation
+
+R[0] = Q0()
+R[1] = Q1(R[0])
+R[2] = Q1(R[1])
+R[3] = Q1(R[2])
+...
+R[i] = Q1(R[i-1])
+
+Stops when R[n] = empty.
+
+RESULT of the recursive SQL = UNION(R[0], R[1], ...)
