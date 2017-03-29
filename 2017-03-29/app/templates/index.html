@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <link rel=stylesheet
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <style>
+            #message {
+                width: 100%;
+                height: 200px;
+                margin-top: 10px;
+            }
+            .buttons {
+                margin-top: 10px;
+            }
+            .postings .post {
+                border: thin solid #aaa;
+                margin: 10px;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Bulletin</h1>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>Post something</h2>
+                    <div class="input-group">
+                      <span class="input-group-addon" id="basic-addon1">@</span>
+                      <input id="name"
+                      type="text" 
+                      class="form-control" 
+                      placeholder="Username" aria-describedby="basic-addon1">
+                    </div>
+                    <textarea id="message"></textarea>
+                    <div style="text-align: right" class="buttons">
+                        <button class="btn btn-primary" id="post">Post</button>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <h2>Posts</h2>
+                    <div style="text-align: right" class="buttons">
+                        <button class="btn btn-primary" id="getposts">Refresh</button>
+                    </div>
+                    <div class="postings"></div>
+                </div>
+            </div>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script>
+        <script>
+            function doPost() {
+                var name = $("#name").val();
+                var message = $("#message").val();
+                if(name != "" && message != "") {
+                    $.get("/api/insert/messages", 
+                        {name: name, message: message},
+                        function() {
+                            getPosts();
+                        });
+                }
+            }
+            function getPosts() {
+                $.get('/api/select/messages',
+                    function(posts) {
+                        var div = $(".postings").empty();
+                        for(var i in posts) {
+                            var post = posts[i];
+                            var divName = $("<div>").text(post[0]);
+                            var divMessage = $("<div>").text(post[1]);
+                            var divPost = $("<div>").append(divName,
+                                divMessage).addClass("post");
+                            div.append(divPost);
+                        }
+                    }, 'JSON');
+            }
+            $("#post").click(doPost);
+            $("#getposts").click(getPosts);
+            getPosts();
+        </script>
+    </body>
+</html>
